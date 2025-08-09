@@ -1,6 +1,6 @@
 # Daily Focus - Simple Daily Goal Tracking
 
-A minimal Chrome extension for tracking daily goals without notifications. Set one important task each day, track your progress, and build streaks.
+A minimal Chrome extension for tracking daily goals. Set one important task each day, track your progress, and build streaks.
 
 ## ✨ Features
 
@@ -9,7 +9,8 @@ A minimal Chrome extension for tracking daily goals without notifications. Set o
 - **Streak Counter**: Track your consecutive completion days
 - **History View**: Review past tasks and completion status
 - **Minimal Design**: Clean, distraction-free interface
-- **No Notifications**: Pure tracking without interruptions
+
+![](/Users/mikis/git/one-thing-chrome-extension/images/completed-task.png)
 
 ## 🚀 Installation (Developer Mode)
 
