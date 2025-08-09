@@ -1,0 +1,21 @@
+{
+    "manifest_version": 3,
+    "name": "Daily Focus",
+    "version": "1.0",
+    "description": "Simple daily goal tracking without notifications",
+    "permissions": [
+        "storage"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "Daily Focus"
+    },
+    "icons": {
+        "16": "icon.png",
+        "48": "icon.png",
+        "128": "icon.png"
+    }
+}

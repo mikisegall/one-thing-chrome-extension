@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daily Focus</title>
+  <style>
+    body {
+      width: 350px;
+      min-height: 400px;
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      background: #f8fafc;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .header p {
+      margin: 0;
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .input-group input, .input-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+
+    .input-group input:focus, .input-group textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    .char-count {
+      text-align: right;
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
+    .history-item {
+      padding: 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      background: #f9fafb;
+    }
+
+    .history-date {
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+
+    .history-task {
+      color: #1f2937;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .history-task.completed {
+      color: #16a34a;
+      text-decoration: line-through;
+    }
+
+    .history-task.incomplete {
+      color: #dc2626;
+    }
+
+    .history-task.skipped {
+      color: #6b7280;
+      font-style: italic;
+    }
+
+    .history-status {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .history-status.completed {
+      color: #16a34a;
+    }
+
+    .history-status.incomplete {
+      color: #dc2626;
+    }
+
+    .streak {
+      text-align: center;
+      background: #dbeafe;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .streak-number {
+      font-size: 32px;
+      font-weight: bold;
+      color: #1d4ed8;
+      display: block;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 16px;
+    }
+
+    .nav-item {
+      padding: 8px 16px;
+      background: none;
+      border: none;
+      color: #6b7280;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .nav-item.active {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+
+
+    .empty-state {
+      text-align: center;
+      color: #6b7280;
+      padding: 40px 20px;
+    }
+
+    .completed-status {
+      font-size: 16px;
+      font-weight: 600;
+      text-align: center;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 16px 0;
+    }
+
+    .completed-status.completed {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .completed-status.skipped {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+
+    .task-display {
+      background: #dbeafe;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .task-display .task-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e3a8a;
+    }
+
+    .simple-question {
+      text-align: center;
+      margin: 24px 0;
+    }
+
+    .simple-question p {
+      font-size: 16px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Navigation -->
+    <div class="nav">
+      <button class="nav-item" id="nav-today">Today</button>
+      <button class="nav-item" id="nav-history">History</button>
+    </div>
+
+    <!-- Morning View -->
+    <div id="morning-view" class="view">
+      <div class="header">
+        <h1>🌅 Good Morning!</h1>
+        <p>What's your most important task today?</p>
+      </div>
+      
+      <div class="input-group">
+        <input type="text" id="morning-task" placeholder="Enter your daily focus..." maxlength="120">
+        <div class="char-count"><span id="task-count">0</span>/120</div>
+      </div>
+      
+      <div class="btn-group">
+        <button class="btn btn-secondary" id="skip-today">Skip Today</button>
+        <button class="btn btn-primary" id="set-focus">Set Focus</button>
+      </div>
+    </div>
+
+    <!-- Evening View -->
+    <div id="evening-view" class="view">
+      <div class="header">
+        <h1>🌙 Day Complete</h1>
+        <p id="evening-task">Today's Focus: Loading...</p>
+      </div>
+      
+      <div class="simple-question">
+        <p>Did you complete your task today?</p>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="complete-day">Yes, I completed it</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Today Task View -->
+    <div id="today-task-view" class="view">
+      <div class="header">
+        <h1>🎯 Today's Focus</h1>
+      </div>
+      
+      <div class="task-display">
+        <div style="font-size: 16px; font-weight: 500; color: #1e40af; margin-bottom: 8px;">Your task for today:</div>
+        <div id="current-task" class="task-text"></div>
+      </div>
+      
+      <div style="text-align: center; color: #6b7280; font-size: 14px;">
+        <p>Keep this in mind throughout your day!</p>
+        <p>You'll be asked about your progress this evening.</p>
+        
+        <div style="margin-top: 20px;">
+          <button class="btn btn-secondary" id="edit-task" style="margin-right: 8px;">Edit Task</button>
+          <button class="btn btn-secondary" id="complete-early">Complete Early</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Today Completed View -->
+    <div id="today-completed-view" class="view">
+      <div class="header">
+        <h1>✅ Today</h1>
+      </div>
+      
+      <div class="task-display">
+        <div style="font-size: 16px; font-weight: 500; color: #1e40af; margin-bottom: 8px;">Today's task:</div>
+        <div id="today-completed-task" class="task-text"></div>
+      </div>
+
+      <div id="today-completed-status" class="completed-status"></div>
+      
+      <div style="text-align: center; color: #6b7280; font-size: 14px;">
+        <p>Great job! Check back tomorrow for a new focus task.</p>
+      </div>
+    </div>
+
+    <!-- History View -->
+    <div id="history-view" class="view">
+      <div class="streak">
+        <span class="streak-number" id="streak-count">0</span>
+        <span>day streak</span>
+      </div>
+      
+      <div id="history-list">
+        <div class="empty-state">
+          <p>No history yet. Complete some daily tasks!</p>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html> 
