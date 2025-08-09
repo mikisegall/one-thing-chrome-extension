@@ -10,7 +10,7 @@ A minimal Chrome extension for tracking daily goals. Set one important task each
 - **History View**: Review past tasks and completion status
 - **Minimal Design**: Clean, distraction-free interface
 
-![](/Users/mikis/git/one-thing-chrome-extension/images/completed-task.png)
+![Completed Task](images/completed-task.png)
 
 ## 🚀 Installation (Developer Mode)
 
@@ -45,6 +45,8 @@ Since this extension is not published on the Chrome Web Store, you'll need to in
 3. Enter your task (up to 120 characters)
 4. Click "Set Focus" or "Skip Today" if you want to skip
 
+![Morning View](images/today-tasks.png)
+
 ### During the Day
 
 - Click the extension icon to see your current task
@@ -65,6 +67,8 @@ Since this extension is not published on the Chrome Web Store, you'll need to in
    - Date
    - Task description
    - Completion status (✓ Completed, Not completed, or Skipped)
+
+![History View](images/history.png)
 
 ## 🎯 Usage Tips
 
