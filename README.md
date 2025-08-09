@@ -10,7 +10,7 @@ A minimal Chrome extension for tracking daily goals. Set one important task each
 - **History View**: Review past tasks and completion status
 - **Minimal Design**: Clean, distraction-free interface
 
-![Completed Task](images/completed-task.png)
+<img src="images/completed-task.png" alt="Completed View" width="50%">
 
 ## 🚀 Installation (Developer Mode)
 
@@ -45,7 +45,7 @@ Since this extension is not published on the Chrome Web Store, you'll need to in
 3. Enter your task (up to 120 characters)
 4. Click "Set Focus" or "Skip Today" if you want to skip
 
-![Morning View](images/today-tasks.png)
+<img src="images/today-tasks.png" alt="Morning View" width="50%">
 
 ### During the Day
 
@@ -68,7 +68,8 @@ Since this extension is not published on the Chrome Web Store, you'll need to in
    - Task description
    - Completion status (✓ Completed, Not completed, or Skipped)
 
-![History View](images/history.png)
+
+<img src="images/history.png" alt="History View" width="50%">
 
 ## 🎯 Usage Tips
 
