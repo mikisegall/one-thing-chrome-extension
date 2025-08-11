@@ -127,7 +127,7 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 If you encounter any issues or have suggestions:
 
-1. Check the [Issues](https://github.com/yourusername/daily-focus-extension/issues) page
+1. Check the [Issues](https://github.com/mikisegall/one-thing-chrome-extension/issues) page
 2. Create a new issue if your problem isn't already listed
 3. Include details about your Chrome version and what you were trying to do
 
