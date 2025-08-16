@@ -4,11 +4,12 @@ A minimal Chrome extension for tracking daily goals. Set one important task each
 
 ## ✨ Features
 
-- **Daily Task Setting**: Set one important task each morning
-- **Progress Tracking**: Mark tasks as completed in the evening
-- **Streak Counter**: Track your consecutive completion days
-- **History View**: Review past tasks and completion status
-- **Minimal Design**: Clean, distraction-free interface
+- **Daily task**: Set one important task each day
+- **Configurable notifications**: Morning, periodic reminders, and evening at times you choose
+- **Active days**: Choose which days of the week count toward your streak
+- **Streak counter**: Tracks consecutive active-day completions (inactive days don’t break streaks)
+- **History**: Review past tasks and completion status
+- **Minimal design**: Clean, distraction-free interface
 
 <img src="images/completed-task.png" alt="Completed View" width="50%">
 
@@ -52,10 +53,11 @@ Since this extension is not published on the Chrome Web Store, you'll need to in
 - Click the extension icon to see your current task
 - Use "Edit Task" to modify your task if needed
 - Use "Complete Early" to mark it done before evening
+- If enabled, you'll receive periodic reminders during the day
 
 ### Evening Reflection
 
-- After 8 PM, the extension automatically shows the evening view
+- At your configured evening time, you'll get a reminder to reflect
 - Click "Yes, I completed it" to mark your task as done
 - This updates your streak and adds to your history
 
@@ -71,6 +73,15 @@ Since this extension is not published on the Chrome Web Store, you'll need to in
 
 <img src="images/history.png" alt="History View" width="50%">
 
+## ⚙️ Settings
+
+- **Times**: Choose your morning and evening notification times.
+- **Reminders**: Set a reminder interval in minutes; reminders pause on inactive days or after you complete/skip the task.
+- **Active days**: Toggle which days count. Inactive days:
+  - won't trigger morning/evening notifications
+  - won't schedule reminders
+  - don't break your streak
+
 ## 🎯 Usage Tips
 
 - **Keep it simple**: Choose one important, achievable task per day
@@ -80,9 +91,9 @@ Since this extension is not published on the Chrome Web Store, you'll need to in
 
 ## 🔧 Technical Details
 
-- **Permissions**: Only requires `storage` permission for saving your data
-- **Data Storage**: All data is stored locally in your browser
-- **No Internet Required**: Works completely offline
+- **Permissions**: `storage`, `notifications`, `alarms`
+- **Data storage**: All data is stored locally in your browser
+- **Offline**: Works completely offline
 
 ## 📊 Data Privacy
 
@@ -97,8 +108,8 @@ Since this extension is not published on the Chrome Web Store, you'll need to in
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/daily-focus-extension.git
-   cd daily-focus-extension
+   git clone https://github.com/mikisegall/one-thing-chrome-extension.git
+   cd one-thing-chrome-extension
    ```
 
 2. Load the extension in Chrome (follow installation steps above)
