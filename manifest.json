@@ -4,7 +4,9 @@
     "version": "1.0",
     "description": "Simple daily goal tracking, one goal at a time",
     "permissions": [
-        "storage"
+        "storage",
+        "notifications",
+        "alarms"
     ],
     "background": {
         "service_worker": "background.js"

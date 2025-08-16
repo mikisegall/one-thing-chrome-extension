@@ -191,6 +191,13 @@ async function setDailyFocus() {
   await chrome.storage.local.set({ [today]: dayData });
   todayData = dayData;
   
+  // Schedule a reminder notification one minute from now
+  try {
+    await chrome.runtime.sendMessage({ type: 'schedule_daily_focus_reminder' });
+  } catch (e) {
+    console.warn('Could not schedule reminder:', e);
+  }
+  
   // Clear input and show today's task view
   taskInput.value = '';
   updateCharCount('morning-task', 'task-count');
