@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Main initialization function
 async function initializePopup() {
   await loadTodayData();
+  await initializeSettingsUI();
   determineCurrentView();
   showView(currentView);
   updateStreakCounter();
@@ -91,6 +92,10 @@ function showView(viewName) {
       document.getElementById('nav-history').classList.add('active');
       loadHistoryData();
       break;
+    case 'settings':
+      document.getElementById('settings-view').classList.add('active');
+      document.getElementById('nav-settings').classList.add('active');
+      break;
   }
   
   currentView = viewName;
@@ -155,6 +160,7 @@ function setupEventListeners() {
   // Navigation
   document.getElementById('nav-today').addEventListener('click', () => showView('today'));
   document.getElementById('nav-history').addEventListener('click', () => showView('history'));
+  document.getElementById('nav-settings').addEventListener('click', () => showView('settings'));
   
   // Morning view
   document.getElementById('morning-task').addEventListener('input', () => {
@@ -169,6 +175,10 @@ function setupEventListeners() {
   // Today task view
   document.getElementById('edit-task').addEventListener('click', editCurrentTask);
   document.getElementById('complete-early').addEventListener('click', completeTaskEarly);
+
+  // Settings view
+  document.getElementById('save-settings').addEventListener('click', saveSettings);
+  document.getElementById('reset-settings').addEventListener('click', resetSettingsToDefaults);
 }
 
 // Set daily focus task
@@ -191,11 +201,11 @@ async function setDailyFocus() {
   await chrome.storage.local.set({ [today]: dayData });
   todayData = dayData;
   
-  // Schedule a reminder notification one minute from now
+  // Schedule reminder notifications using current settings
   try {
-    await chrome.runtime.sendMessage({ type: 'schedule_daily_focus_reminder' });
+    await chrome.runtime.sendMessage({ type: 'schedule_reminders_after_task_set' });
   } catch (e) {
-    console.warn('Could not schedule reminder:', e);
+    console.warn('Could not schedule reminders:', e);
   }
   
   // Clear input and show today's task view
@@ -216,6 +226,12 @@ async function skipToday() {
   
   await chrome.storage.local.set({ [today]: dayData });
   todayData = dayData;
+
+  // Stop reminders for today
+  try {
+    await chrome.runtime.sendMessage({ type: 'clear_reminders_for_today' });
+  } catch (e) {}
+
   showView('today-completed');
 }
 
@@ -230,6 +246,11 @@ async function completeDay() {
   
   await chrome.storage.local.set({ [today]: dayData });
   todayData = dayData;
+
+  // Stop reminders for today
+  try {
+    await chrome.runtime.sendMessage({ type: 'clear_reminders_for_today' });
+  } catch (e) {}
   
   // Update streak and show today's completed view
   await updateStreakCounter();
@@ -327,6 +348,79 @@ async function loadHistoryData() {
 // Utility function to get today's date key
 function getTodayKey() {
   return new Date().toISOString().split('T')[0];
+}
+
+// Settings helpers
+function getDefaultSettings() {
+  return {
+    morningHour: 10,
+    morningMinute: 0,
+    eveningHour: 18,
+    eveningMinute: 0,
+    reminderMinutes: 60,
+    enableMorning: true,
+    enableEvening: true,
+    enableReminders: true
+  };
+}
+
+async function loadSettings() {
+  const { settings } = await chrome.storage.local.get(['settings']);
+  return { ...getDefaultSettings(), ...(settings || {}) };
+}
+
+async function initializeSettingsUI() {
+  const s = await loadSettings();
+  // Time input expects HH:MM in 24h
+  const morningStr = `${String(s.morningHour).padStart(2,'0')}:${String(s.morningMinute).padStart(2,'0')}`;
+  const eveningStr = `${String(s.eveningHour).padStart(2,'0')}:${String(s.eveningMinute).padStart(2,'0')}`;
+  
+  document.getElementById('enable-morning').checked = !!s.enableMorning;
+  document.getElementById('enable-evening').checked = !!s.enableEvening;
+  document.getElementById('enable-reminders').checked = !!s.enableReminders;
+  document.getElementById('morning-time').value = morningStr;
+  document.getElementById('evening-time').value = eveningStr;
+  document.getElementById('reminder-minutes').value = String(s.reminderMinutes);
+}
+
+async function saveSettings() {
+  const enableMorning = document.getElementById('enable-morning').checked;
+  const enableEvening = document.getElementById('enable-evening').checked;
+  const enableReminders = document.getElementById('enable-reminders').checked;
+
+  const morningTime = (document.getElementById('morning-time').value || '10:00').split(':');
+  const eveningTime = (document.getElementById('evening-time').value || '18:00').split(':');
+
+  const reminderMinutes = Number(document.getElementById('reminder-minutes').value || '60');
+
+  const newSettings = {
+    enableMorning,
+    enableEvening,
+    enableReminders,
+    morningHour: Number(morningTime[0]) || 10,
+    morningMinute: Number(morningTime[1]) || 0,
+    eveningHour: Number(eveningTime[0]) || 18,
+    eveningMinute: Number(eveningTime[1]) || 0,
+    reminderMinutes: Math.max(1, reminderMinutes)
+  };
+
+  await chrome.storage.local.set({ settings: newSettings });
+
+  // Ask background to reschedule morning/evening alarms
+  try {
+    await chrome.runtime.sendMessage({ type: 'reschedule_morning_evening' });
+  } catch (e) {}
+
+  alert('Settings saved');
+}
+
+async function resetSettingsToDefaults() {
+  const defaults = getDefaultSettings();
+  await chrome.storage.local.set({ settings: defaults });
+  await initializeSettingsUI();
+  try {
+    await chrome.runtime.sendMessage({ type: 'reschedule_morning_evening' });
+  } catch (e) {}
 }
 
 
