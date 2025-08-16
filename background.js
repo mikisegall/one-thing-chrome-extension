@@ -27,7 +27,8 @@ function getDefaultSettings() {
     reminderMinutes: 60,
     enableMorning: true,
     enableEvening: true,
-    enableReminders: true
+    enableReminders: true,
+    activeDays: [1,2,3,4,5,6,0]
   };
 }
 
@@ -47,6 +48,11 @@ function nextOccurrenceTimestamp(targetHour, targetMinute) {
 }
 
 async function showMorningNotification() {
+  const settings = await getSettings();
+  const todayDay = new Date().getDay();
+  if (!(settings.activeDays || []).includes(todayDay)) {
+    return;
+  }
   const options = {
     type: 'basic',
     iconUrl: 'icon.png',
@@ -61,6 +67,13 @@ async function showMorningNotification() {
 }
 
 async function showReminderNotification() {
+  const settings = await getSettings();
+  const todayDay = new Date().getDay();
+  if (!(settings.activeDays || []).includes(todayDay)) {
+    // if inactive day, ensure reminders are cleared
+    try { await chrome.alarms.clear(ALARM_REMINDER); } catch (e) {}
+    return;
+  }
   const todayKey = getTodayKey();
   const stored = await chrome.storage.local.get([todayKey]);
   const entry = stored[todayKey];
@@ -87,6 +100,11 @@ async function showReminderNotification() {
 }
 
 async function showEveningNotification() {
+  const settings = await getSettings();
+  const todayDay = new Date().getDay();
+  if (!(settings.activeDays || []).includes(todayDay)) {
+    return;
+  }
   const todayKey = getTodayKey();
   const stored = await chrome.storage.local.get([todayKey]);
   const entry = stored[todayKey];
@@ -119,22 +137,40 @@ async function scheduleMorningEveningAlarms() {
     chrome.alarms.clear(ALARM_EVENING)
   ]);
 
+  const today = new Date();
+  const todayIndex = today.getDay();
+
   if (settings.enableMorning) {
-    chrome.alarms.create(ALARM_MORNING, {
-      when: nextOccurrenceTimestamp(settings.morningHour, settings.morningMinute)
-    });
+    // schedule next morning occurrence that falls on an active day
+    let next = new Date();
+    next.setHours(settings.morningHour, settings.morningMinute, 0, 0);
+    if (next.getTime() <= Date.now()) {
+      next.setDate(next.getDate() + 1);
+    }
+    // advance until active day
+    while (!(settings.activeDays || []).includes(next.getDay())) {
+      next.setDate(next.getDate() + 1);
+    }
+    chrome.alarms.create(ALARM_MORNING, { when: next.getTime() });
   }
 
   if (settings.enableEvening) {
-    chrome.alarms.create(ALARM_EVENING, {
-      when: nextOccurrenceTimestamp(settings.eveningHour, settings.eveningMinute)
-    });
+    let next = new Date();
+    next.setHours(settings.eveningHour, settings.eveningMinute, 0, 0);
+    if (next.getTime() <= Date.now()) {
+      next.setDate(next.getDate() + 1);
+    }
+    while (!(settings.activeDays || []).includes(next.getDay())) {
+      next.setDate(next.getDate() + 1);
+    }
+    chrome.alarms.create(ALARM_EVENING, { when: next.getTime() });
   }
 }
 
 async function scheduleReminderAlarmsFromNow() {
   const settings = await getSettings();
-  if (!settings.enableReminders) {
+  const todayDay = new Date().getDay();
+  if (!settings.enableReminders || !(settings.activeDays || []).includes(todayDay)) {
     await chrome.alarms.clear(ALARM_REMINDER);
     return;
   }
@@ -175,12 +211,16 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
       await showMorningNotification();
       // At the start of a new day, stop previous reminder loop until a new task is set
       try { await chrome.alarms.clear(ALARM_REMINDER); } catch (e) {}
-      // Reschedule for next day
+      // Reschedule for next active day
       const settings = await getSettings();
       if (settings.enableMorning) {
-        chrome.alarms.create(ALARM_MORNING, {
-          when: nextOccurrenceTimestamp(settings.morningHour, settings.morningMinute)
-        });
+        let next = new Date();
+        next.setDate(next.getDate() + 1);
+        next.setHours(settings.morningHour, settings.morningMinute, 0, 0);
+        while (!(settings.activeDays || []).includes(next.getDay())) {
+          next.setDate(next.getDate() + 1);
+        }
+        chrome.alarms.create(ALARM_MORNING, { when: next.getTime() });
       }
       break;
     }
@@ -190,12 +230,16 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     }
     case ALARM_EVENING: {
       await showEveningNotification();
-      // Reschedule for next day
+      // Reschedule for next active day
       const settings = await getSettings();
       if (settings.enableEvening) {
-        chrome.alarms.create(ALARM_EVENING, {
-          when: nextOccurrenceTimestamp(settings.eveningHour, settings.eveningMinute)
-        });
+        let next = new Date();
+        next.setDate(next.getDate() + 1);
+        next.setHours(settings.eveningHour, settings.eveningMinute, 0, 0);
+        while (!(settings.activeDays || []).includes(next.getDay())) {
+          next.setDate(next.getDate() + 1);
+        }
+        chrome.alarms.create(ALARM_EVENING, { when: next.getTime() });
       }
       break;
     }

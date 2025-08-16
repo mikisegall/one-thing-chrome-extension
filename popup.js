@@ -267,6 +267,10 @@ function updateCharCount(inputId, countId) {
 // Calculate and update streak counter
 async function updateStreakCounter() {
   const result = await chrome.storage.local.get(null);
+  const { settings } = await chrome.storage.local.get(['settings']);
+  const s = { ...getDefaultSettings(), ...(settings || {}) };
+  const activeDaysSet = new Set((s.activeDays || [0,1,2,3,4,5,6]));
+
   const entries = Object.keys(result)
     .filter(key => key.match(/^\d{4}-\d{2}-\d{2}$/))
     .map(key => ({ date: key, ...result[key] }))
@@ -274,16 +278,26 @@ async function updateStreakCounter() {
     .sort((a, b) => new Date(b.date) - new Date(a.date));
   
   let streak = 0;
-  const today = getTodayKey();
+    const today = getTodayKey();
   let checkDate = new Date();
-  
-  // If today is completed, start from today, otherwise start from yesterday
-  if (!entries.find(e => e.date === today)) {
+ 
+  // If today is completed (and an active day), start from today, otherwise start from yesterday
+  const todayDayIndex = new Date().getDay();
+  const todayIsActive = activeDaysSet.has(todayDayIndex);
+  if (!(entries.find(e => e.date === today) && todayIsActive)) {
     checkDate.setDate(checkDate.getDate() - 1);
   }
-  
+
   while (true) {
     const dateKey = checkDate.toISOString().split('T')[0];
+    const dayIndex = checkDate.getDay();
+    
+    if (!activeDaysSet.has(dayIndex)) {
+      // Skip non-active days without breaking the streak
+      checkDate.setDate(checkDate.getDate() - 1);
+      continue;
+    }
+
     const entry = entries.find(e => e.date === dateKey);
     
     if (entry && entry.completed && !entry.skipped) {
@@ -360,7 +374,8 @@ function getDefaultSettings() {
     reminderMinutes: 60,
     enableMorning: true,
     enableEvening: true,
-    enableReminders: true
+    enableReminders: true,
+    activeDays: [1,2,3,4,5,6,0] // default to all 7 days active
   };
 }
 
@@ -381,6 +396,25 @@ async function initializeSettingsUI() {
   document.getElementById('morning-time').value = morningStr;
   document.getElementById('evening-time').value = eveningStr;
   document.getElementById('reminder-minutes').value = String(s.reminderMinutes);
+
+  // Initialize day selector
+  const selector = document.getElementById('day-selector');
+  if (selector) {
+    selector.querySelectorAll('.day').forEach(btn => {
+      const dayIndex = Number(btn.getAttribute('data-day'));
+      const isSelected = (s.activeDays || []).includes(dayIndex);
+      btn.classList.toggle('selected', isSelected);
+      btn.setAttribute('aria-pressed', String(isSelected));
+      if (btn.dataset.bound !== '1') {
+        btn.addEventListener('click', () => {
+          const nowSelected = !btn.classList.contains('selected');
+          btn.classList.toggle('selected', nowSelected);
+          btn.setAttribute('aria-pressed', String(nowSelected));
+        });
+        btn.dataset.bound = '1';
+      }
+    });
+  }
 }
 
 async function saveSettings() {
@@ -393,6 +427,19 @@ async function saveSettings() {
 
   const reminderMinutes = Number(document.getElementById('reminder-minutes').value || '60');
 
+  // Collect active days from UI
+  const selector = document.getElementById('day-selector');
+  let activeDays = [0,1,2,3,4,5,6];
+  if (selector) {
+    activeDays = Array.from(selector.querySelectorAll('.day.selected'))
+      .map(btn => Number(btn.getAttribute('data-day')))
+      .sort((a,b) => a - b);
+    if (activeDays.length === 0) {
+      // prevent empty -> fallback to weekdays
+      activeDays = [1,2,3,4,5];
+    }
+  }
+
   const newSettings = {
     enableMorning,
     enableEvening,
@@ -401,7 +448,8 @@ async function saveSettings() {
     morningMinute: Number(morningTime[1]) || 0,
     eveningHour: Number(eveningTime[0]) || 18,
     eveningMinute: Number(eveningTime[1]) || 0,
-    reminderMinutes: Math.max(1, reminderMinutes)
+    reminderMinutes: Math.max(1, reminderMinutes),
+    activeDays
   };
 
   await chrome.storage.local.set({ settings: newSettings });
