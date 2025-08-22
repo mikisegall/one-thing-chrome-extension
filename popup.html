@@ -60,7 +60,7 @@
       color: #374151;
     }
 
-    .input-group input, .input-group textarea {
+    .input-group input, .input-group textarea, .input-group select {
       width: 100%;
       padding: 12px;
       border: 2px solid #e5e7eb;
@@ -70,7 +70,7 @@
       font-family: inherit;
     }
 
-    .input-group input:focus, .input-group textarea:focus {
+    .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
       outline: none;
       border-color: #3b82f6;
     }
@@ -255,6 +255,41 @@
       color: #374151;
       margin-bottom: 16px;
     }
+
+    /* Day selector styles */
+    .day-selector {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+    }
+
+    .day-selector .day {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      color: #374151;
+      background: white;
+      transition: all 0.2s;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .day-selector .day.selected {
+      border-color: #3b82f6;
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .day-selector .day:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
   </style>
 </head>
 <body>
@@ -263,6 +298,7 @@
     <div class="nav">
       <button class="nav-item" id="nav-today">Today</button>
       <button class="nav-item" id="nav-history">History</button>
+      <button class="nav-item" id="nav-settings">Settings</button>
     </div>
 
     <!-- Morning View -->
@@ -349,6 +385,70 @@
         <div class="empty-state">
           <p>No history yet. Complete some daily tasks!</p>
         </div>
+      </div>
+    </div>
+
+    <!-- Settings View -->
+    <div id="settings-view" class="view">
+      <div class="header">
+        <h1>⚙️ Settings</h1>
+        <p>Configure notifications</p>
+      </div>
+
+      <div class="input-group">
+        <label>
+          <input type="checkbox" id="enable-morning"> Enable morning notification
+        </label>
+      </div>
+
+      <div class="input-group">
+        <label for="morning-time">Morning time</label>
+        <input type="time" id="morning-time">
+      </div>
+
+      <div class="input-group">
+        <label>
+          <input type="checkbox" id="enable-evening"> Enable evening notification
+        </label>
+      </div>
+
+      <div class="input-group">
+        <label for="evening-time">Evening time</label>
+        <input type="time" id="evening-time">
+      </div>
+
+      <div class="input-group">
+        <label>
+          <input type="checkbox" id="enable-reminders"> Enable hourly reminders after setting a task
+        </label>
+      </div>
+
+      <div class="input-group">
+        <label for="reminder-minutes">Reminder frequency (minutes)</label>
+        <select id="reminder-minutes">
+          <option value="15">Every 15 minutes</option>
+          <option value="30">Every 30 minutes</option>
+          <option value="60" selected>Every 60 minutes</option>
+          <option value="120">Every 2 hours</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Active days</label>
+        <div id="day-selector" class="day-selector" role="group" aria-label="Active days">
+          <button type="button" class="day" data-day="0" aria-pressed="true" title="Sunday">S</button>
+          <button type="button" class="day" data-day="1" aria-pressed="true" title="Monday">M</button>
+          <button type="button" class="day" data-day="2" aria-pressed="true" title="Tuesday">T</button>
+          <button type="button" class="day" data-day="3" aria-pressed="true" title="Wednesday">W</button>
+          <button type="button" class="day" data-day="4" aria-pressed="true" title="Thursday">T</button>
+          <button type="button" class="day" data-day="5" aria-pressed="true" title="Friday">F</button>
+          <button type="button" class="day" data-day="6" aria-pressed="true" title="Saturday">S</button>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-secondary" id="reset-settings">Reset to Defaults</button>
+        <button class="btn btn-primary" id="save-settings">Save Settings</button>
       </div>
     </div>
 
